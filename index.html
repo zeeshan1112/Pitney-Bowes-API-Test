@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style type="text/css">
+
+.container{
+                width: 70%;
+                min-height: 100%;
+                position: relative;
+                margin: auto;
+                
+            }
+
+*
+{margin:0;
+padding:0;}
+  .box{
+                padding: 15px 0px;
+                width: 100%;
+                margin: 10px 0px;
+                background: transparent;
+                border: 1px solid #4a6785;
+                text-align: center;
+                color: #fff;
+            }
+             .submitbutton{
+                padding: 15px 0px;
+                width: 100%;
+                margin: 10px auto;
+                background: #ffffff;
+                border: 1px solid #ffffff;
+                text-align: center;
+                color: ##34495e;
+            }
+            body
+            {
+                 background: #34495e; /* Old browsers */
+            
+            }
+#hoverOver
+            {
+            position:fixed;
+            display:none;
+            top:0px;
+            left:0px;
+            height:100%;
+            width:100%;
+            background:rgba(0,0,0,0.7);
+            }
+            #displayMsg
+            {
+            position:relative;
+            margin:0 auto;
+            width:auto;
+            max-width:80%;
+            padding:10px;
+            background:white;
+            margin-top:10%;
+            text-align:center;
+            border-radius:10px;
+            border:1px solid #c3c3c3;
+            font-size:12px;
+            line-height:20px;
+            }
+            #displayMsg button
+            {
+                outline:none;
+                padding:5px;
+                padding-left:10px;
+                padding-right:10px;
+                color:#c3c3c3;
+                border:1px solid #c3c3c;
+                background:white;
+                
+            }
+            #displayMsg img
+            {
+            width:60px;}
+
+            </style>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+<script src="http://maps.googleapis.com/maps/api/js"></script>
+<script>
+
+function initialize(lat,lon) {
+  var mapProp = {
+    center:new google.maps.LatLng(lat,lon),
+    zoom:14,
+    mapTypeId:google.maps.MapTypeId.ROADMAP
+  };
+  var map=new google.maps.Map(document.getElementById("googlemap"),mapProp);
+  var marker=new google.maps.Marker({
+  position:new google.maps.LatLng(lat,lon),
+  });
+
+marker.setMap(map);
+}
+
+function getData()
+            {
+                var lat=document.getElementById("lat").value;
+                var lon=document.getElementById("lon").value;
+                
+                if(lat=="" || lon=="")
+                {
+                    $("#hoverOver").show();
+                    $("#displayMsg").html("<center>Please Enter Latitude and longitude<center>");
+                    return false;
+                }
+                $("#hoverOver").show();
+                $("#displayMsg").html("<center><img src='loading.gif'><br/><br/>fetching Details..<center>");
+                
+                var dataDetails={
+                 
+                lat: lat,
+                lon: lon,
+               }
+                console.log("ENTERED");
+        $.ajax({
+            type: "POST",
+            url: "new1.php",
+            data: dataDetails,
+            success: function(result){      
+               
+             if(result.search("error")>-1)
+             { 
+                $("#displayMsg").html("Data Not Available<br/><br/><center><button id='closeMsg'>Close</button><center>");
+             }
+             else if(result[12]=='['&&result[13]==']')
+                {$("#displayMsg").html("Data Not Available<br/><br/><center><button id='closeMsg'>Close</button><center>");}
+            else
+                 {
+                        $("#displayMsg").html(result+"<br/><br/><center><button id='closeMsg'>Close</button><center>");
+                        initialize(lat,lon);
+                 }
+            },
+            error: function(error){
+                $("#displayMsg").html("Problem in Connection.<br/>Please Check Internet Connectivity<br/><br/><center><button id='closeMsg'>Close</button><center>");
+                
+            }
+        });
+       }
+
+
+       function fetchLocation()
+
+       {
+            var x=$('#locFetch');
+            if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition, showerr);
+            } 
+            else { 
+            $('#locFetch').innerHTML = "Geolocation is not supported by this browser.";
+            }
+       }
+
+       function showPosition(position)
+       {
+        document.getElementById('lat').value=position.coords.latitude;
+        document.getElementById('lon').value=position.coords.longitude;
+        document.getElementById('getData').click();    
+       }
+       function showerr(error)
+       {
+        document.getElementById('locFetch').innerHTML = "Error Code="+error.code+", Error Message: "+error.message;
+       }
+
+
+
+</script>
+</head>
+<body>
+<div class="container">
+<input name="longitude" id="lon" class="box">
+<input name="latitude" id="lat" class="box">
+<button onclick="getData()" id="getData"class="submitbutton">Get Result</button>
+<br/>
+<br/>
+OR
+<br/>
+<br/>
+<button class="submitbutton" onclick="fetchLocation()">Fetch My Location</button>
+<div id="locFetch" class="box" style="border:0px;"></div>
+<div id="hoverOver">
+    <div id="displayMsg">
+    </div> 
+</div>
+
+<div id="googlemap" style="width:100%;height:450px;"></div>
+
+</div>
+<script type="text/javascript">
+ $(document).ready(function(){
+            $("#closeMsg").click(function(){
+                $("#hoverOver").hide();
+            });
+            $("#hoverOver").click(function(){
+                $("#hoverOver").hide();
+            }); 
+            
+        });
+</script>
+
+</body>
+</html>
+
+
+
+
+
